@@ -1,10 +1,7 @@
 package tech.joaogugel.webinfo;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -15,8 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 import tech.joaogugel.webinfo.event.EntityStatusEventHandler;
-import tech.joaogugel.webinfo.event.PickupEventHandler;
-import tech.joaogugel.webinfo.web.WebSocketHandler;
+import tech.joaogugel.webinfo.web.WebSocketClient;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(WebInfoMod.MODID)
@@ -24,14 +20,13 @@ public class WebInfoMod
 {
     public static final String MODID = "webinfo";
     private static final Logger LOGGER = LogUtils.getLogger();
-    private final WebSocketHandler webSocket = new WebSocketHandler("ws://localhost:8080");
+    private final WebSocketClient webSocket = new WebSocketClient("ws://localhost:8080");
 
 
     public WebInfoMod()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        MinecraftForge.EVENT_BUS.register(new PickupEventHandler());
         MinecraftForge.EVENT_BUS.register(new EntityStatusEventHandler(webSocket));
 
         modEventBus.addListener(this::commonSetup);

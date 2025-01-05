@@ -8,13 +8,13 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.util.concurrent.CompletionStage;
 
-public class WebSocketHandler {
+public class WebSocketClient {
     private WebSocket webSocket;
     private static final Logger LOGGER = LogUtils.getLogger();
     private final String serverUri;
     private final HttpClient client;
 
-    public WebSocketHandler(String uri) {
+    public WebSocketClient(String uri) {
         this.serverUri = uri;
         this.client = HttpClient.newHttpClient();
     }
