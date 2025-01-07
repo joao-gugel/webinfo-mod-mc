@@ -3,7 +3,9 @@ import Dead from "@/components/Dead";
 import PlayerInfo from "@/components/PlayerInfo";
 import PlayerStats from "@/components/PlayerStats";
 import WorldInfo from "@/components/WorldInfo";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const RainingGif = require("../assets/images/minecraft/rain-minecraft.gif");
 
 import {
   StyleSheet,
@@ -13,39 +15,47 @@ import {
   ImageBackground,
 } from "react-native";
 
-const playerMockData = {
-  dimensionName: "overworld",
-  playerName: "Dev",
-  worldPosition: {
-    x: -38.560056968657804,
-    y: 70.0,
-    z: -27.662255227075484,
-  },
-  playerHealthLevel: 10.0,
-  playerFoodLevel: 20,
-  playerScore: 0,
-  isInWater: true,
-  isOnFire: false,
-  isSleeping: false,
-  isAlive: true,
-  isRaining: true,
-  isThundering: true,
-  isClearWeather: false,
-};
-
 const bgImage = {
   overworld: require("../assets/images/minecraft/overworld.webp"),
-  nether: require("../assets/images/minecraft/nether.png"),
+  the_nether: require("../assets/images/minecraft/nether.png"),
   end: require("../assets/images/minecraft/end.webp"),
 };
 
 export default function HomeScreen() {
-  const [playerData, setPlayerData] = useState<Player | null>(playerMockData);
+  const [connected, setConnected] = useState(false);
+  const [playerData, setPlayerData] = useState<Player | null>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://192.168.0.6:8080");
+
+    ws.onopen = () => setConnected(true);
+
+    ws.onmessage = (event) => {
+      const data = event.data;
+
+      if (data.startsWith("{")) {
+        try {
+          setPlayerData(JSON.parse(data).data);
+        } catch (error) {
+          console.error("Erro ao fazer parse:", error);
+        }
+      } else {
+        console.warn("Mensagem não JSON recebida:", data);
+      }
+    };
+  }, []);
+
+  if (!connected)
+    return (
+      <SafeAreaView style={styles.emptyDataContainer}>
+        <Text style={styles.text}>Esperando conexão...</Text>
+      </SafeAreaView>
+    );
 
   if (!playerData)
     return (
       <SafeAreaView style={styles.emptyDataContainer}>
-        <Text style={styles.text}>Aguardando dados do jogador...</Text>
+        <Text style={styles.text}>Nenhum dado encontrado...</Text>
       </SafeAreaView>
     );
 
@@ -59,7 +69,9 @@ export default function HomeScreen() {
       style={{ width: "100%", height: "100%", backgroundColor: "#fff" }}
     >
       <ImageBackground
-        source={require("../assets/images/minecraft/rain-minecraft.gif")}
+        source={
+          playerData.isRaining || playerData.isThundering ? RainingGif : ""
+        }
         style={{ width: "100%", height: "100%" }}
       >
         <View style={styles.darkOverlay}>
